@@ -1,6 +1,6 @@
 package numbers;
 
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     private static boolean isExit = false;
@@ -11,8 +11,12 @@ public class Main {
 
                 Supported requests:
                 - enter a natural number to know its properties;
+                - enter two natural numbers to obtain the properties of the list:
+                  * the first parameter represents a starting number;
+                  * the second parameter shows how many consecutive numbers are to be processed;
+                - separate the parameters with one space;
                 - enter 0 to exit.
-                """);
+                                """);
 
         while (!isExit) {
             showMenu();
@@ -24,18 +28,40 @@ public class Main {
         System.out.println("");
         System.out.print("Enter a request: ");
         Scanner scanner = new Scanner(System.in);
-        long number = scanner.nextLong();
+        String[] strArrWithNumbers = scanner.nextLine().split(" ");
         System.out.println("");
-        if (isNatural(number)) {
-            printProperties(number);
-        } else if (number == 0) {
+        long firstNumber;
+        long secondNumber;
+        try {
+            firstNumber = Long.parseLong(strArrWithNumbers[0]);
+        } catch (NumberFormatException e) {
+            System.out.println("The first parameter should be a natural number or zero.");
+            return;
+        }
+        if (isNatural(firstNumber)) {
+            if (strArrWithNumbers.length == 1) {
+                printPropertiesForOneLarge(firstNumber);
+            } else {
+                try {
+                    secondNumber = Long.parseLong(strArrWithNumbers[1]);
+                } catch (NumberFormatException e) {
+                    System.out.println("The second parameter should be a natural number");
+                    return;
+                }
+                if (isNatural(secondNumber)) {
+                    printPropertiesForArray(firstNumber, secondNumber);
+                } else {
+                    System.out.println("The second parameter should be a natural number");
+                }
+            }
+        } else if (firstNumber == 0) {
             isExit = true;
             System.out.println("Goodbye!");
         } else {
             System.out.println("The first parameter should be a natural number or zero.");
         }
-
     }
+
 
     private static boolean isDivisableBySeven(long number) {
         long smallestDivider = number;
@@ -59,43 +85,14 @@ public class Main {
         return isDivisableBySeven(number) || isEndedBySeven(number);
     }
 
-    private static void printResultsWithExplanation(long number) {
-        boolean isDivisableBySeven = isDivisableBySeven(number);
-        boolean isEndedBySeven = isEndedBySeven(number);
-        boolean isOddNumber = isOddNumber(number);
-        if (number <= 0) {
-            System.out.println("This number is not natural!");
-            return;
-        }
-        if (isOddNumber) {
-            System.out.println("This number is Odd.");
-        } else {
-            System.out.println("This number is Even.");
-        }
-        if (isEndedBySeven || isDivisableBySeven) {
-            System.out.println("It is a Buzz number.");
-        } else {
-            System.out.println("It is not a Buzz number.");
-        }
-        System.out.println("Explanation:");
-        if (isEndedBySeven && isDivisableBySeven) {
-            System.out.println(number + " is divisible by 7 and ends with 7");
-        } else if (isEndedBySeven) {
-            System.out.println(number + " ends with 7");
-        } else if (isDivisableBySeven) {
-            System.out.println(number + " is divisible by 7");
-        } else {
-            System.out.println(number + " is neither divisible by 7 nor does it end with 7");
-        }
-    }
-
-    private static void printProperties(long number) {
+    private static void printPropertiesForOneLarge(long number) {
         System.out.printf("Properties of %d%n", number);
         System.out.println("        even: " + !isOddNumber(number));
         System.out.println("         odd: " + isOddNumber(number));
         System.out.println("        buzz: " + isBuzzNumber(number));
         System.out.println("        duck: " + isDuckNumber(number));
         System.out.println(" palindromic: " + isPalindromic(number));
+        System.out.println("      gapful: " + isGapfulNumber(number));
     }
 
     private static boolean isPalindromic(long number) {
@@ -120,5 +117,45 @@ public class Main {
             number = number / 10;
         }
         return false;
+    }
+
+    private static boolean isGapfulNumber(long number) {
+        if (number / 100 > 0) {
+            long firstDigit = number;
+            long lastDigit = number % 10;
+            while (firstDigit >= 10) {
+                firstDigit = firstDigit / 10;
+            }
+            String remainderForGapful = firstDigit + String.valueOf(lastDigit);
+            return number % (Long.parseLong(remainderForGapful)) == 0;
+        }
+        return false;
+    }
+
+    private static void printPropertiesForArray(long number, long count) {
+        for (int i = 0; i < count; i++) {
+            printPropertiesForOneShort(number);
+            number++;
+        }
+    }
+
+    private static void printPropertiesForOneShort(long number) {
+        List<String> listOfNumberProperties = new ArrayList<>();
+        listOfNumberProperties.add(isOddNumber(number) ? "odd" : "even");
+        if (isBuzzNumber(number)) {
+            listOfNumberProperties.add("buzz");
+        }
+        if (isDuckNumber(number)) {
+            listOfNumberProperties.add("duck");
+        }
+        if (isPalindromic(number)) {
+            listOfNumberProperties.add("palindromic");
+        }
+        if (isGapfulNumber(number)) {
+            listOfNumberProperties.add("gapful");
+        }
+        Collections.sort(listOfNumberProperties);
+        String propertiesString = String.join(", ", listOfNumberProperties);
+        System.out.printf("        %s is %s%n", number, propertiesString);
     }
 }
