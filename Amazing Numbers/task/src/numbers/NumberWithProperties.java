@@ -33,7 +33,34 @@ public class NumberWithProperties {
         if (isJumpingNumber(number)) {
             properties.add("jumping");
         }
+        properties.add(isHappyNumber(number) ? "happy" : "sad");
         properties.add(isOddNumber(number) ? "odd" : "even");
+    }
+
+    private boolean isHappyNumber(long number) {
+        long sumOfSquares = sumSquareOfDigits(number);
+        long amountOfAttempts = 0;
+
+        while (sumOfSquares != 1 && sumOfSquares != number) {
+            sumOfSquares = sumSquareOfDigits(sumOfSquares);
+            if (amountOfAttempts > 100) {
+                break;
+            }
+            amountOfAttempts++;
+        }
+        return sumOfSquares == 1;
+    }
+
+    private long sumSquareOfDigits(long number) {
+        long firstDigit = number;
+        long lastDigit = number % 10;
+        long sumOfSquares = (long) Math.pow(lastDigit, 2);
+        while (firstDigit >= 10) {
+            firstDigit /= 10;
+            sumOfSquares += (long) Math.pow(firstDigit % 10, 2);
+
+        }
+        return sumOfSquares;
     }
 
     private static boolean isSunnyNumber(long number) {

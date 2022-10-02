@@ -20,12 +20,13 @@ public class Main {
                 - enter a natural number to know its properties;
                 - enter two natural numbers to obtain the properties of the list:
                   * the first parameter represents a starting number;
-                  * the second parameter shows how many consecutive numbers are to be printed;
-                - two natural numbers and a property to search for;
-                - two natural numbers and two properties to search for;
+                  * the second parameter shows how many consecutive numbers are to be processed;
+                - two natural numbers and properties to search for;
+                - a property preceded by minus must not be present in numbers;
                 - separate the parameters with one space;
                 - enter 0 to exit.
-                                """);
+
+                """);
     }
 
     public static void showMenu() {
@@ -50,9 +51,16 @@ public class Main {
         long number = Long.parseLong(strArrWithNumbers[0]);
         long countNumbers = Long.parseLong(strArrWithNumbers[1]);
         List<String> propertiesToSearch = new ArrayList<>();
+        List<String> propertiesToSearchToExclude = new ArrayList<>();
         for (int i = 2; i < strArrWithNumbers.length; i++) {
-            propertiesToSearch.add(strArrWithNumbers[i].toLowerCase());
+            String currentArgument = strArrWithNumbers[i].toLowerCase();
+            if (currentArgument.startsWith("-")) {
+                propertiesToSearchToExclude.add(currentArgument.substring(1));
+            } else {
+                propertiesToSearch.add(currentArgument);
+            }
         }
+
         int currentAmount = 0;
         while (countNumbers > currentAmount) {
             boolean isNotFinded = false;
@@ -62,6 +70,23 @@ public class Main {
                 if (!currentNumberWithProperties.properties.contains(currentProperty)) {
                     isNotFinded = true;
                     break;
+                } else {
+                    for (String currentPropertyToExclude : propertiesToSearchToExclude
+                    ) {
+                        if (currentNumberWithProperties.properties.contains(currentPropertyToExclude)) {
+                            isNotFinded = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (propertiesToSearch.size() == 0) {
+                for (String currentPropertyToExclude : propertiesToSearchToExclude
+                ) {
+                    if (currentNumberWithProperties.properties.contains(currentPropertyToExclude)) {
+                        isNotFinded = true;
+                        break;
+                    }
                 }
             }
             if (!isNotFinded) {
@@ -74,7 +99,7 @@ public class Main {
     }
 
     private static boolean isCorrectArguments(String[] strArrWithNumbers) {
-        List<String> propertiesNames = Arrays.asList("BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE", "SUNNY", "EVEN", "ODD", "JUMPING");
+        List<String> propertiesNames = Arrays.asList("BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE", "SUNNY", "EVEN", "ODD", "JUMPING", "HAPPY", "SAD");
         long firstNumber;
         long secondNumber;
         try {
@@ -103,8 +128,15 @@ public class Main {
             if (strArrWithNumbers.length > 2) {
                 List<String> wrongArguments = new ArrayList<>();
                 for (int i = 2; i < strArrWithNumbers.length; i++) {
-                    if (!propertiesNames.contains(strArrWithNumbers[i].toUpperCase())) {
-                        wrongArguments.add(strArrWithNumbers[i].toUpperCase());
+                    String currentArgToCheck = strArrWithNumbers[i].toUpperCase();
+                    if (currentArgToCheck.startsWith("-")) {
+                        if (!propertiesNames.contains(currentArgToCheck.substring(1))) {
+                            wrongArguments.add(currentArgToCheck);
+                        }
+                    } else {
+                        if (!propertiesNames.contains(currentArgToCheck)) {
+                            wrongArguments.add(currentArgToCheck);
+                        }
                     }
                 }
                 switch (wrongArguments.size()) {
@@ -143,20 +175,53 @@ public class Main {
         for (int i = 2; i < strArrWithNumbers.length; i++) {
             propertiesToSearch.add(strArrWithNumbers[i].toLowerCase());
         }
-        String strArgs = String.join(" ", strArrWithNumbers).toLowerCase();
-        if ((strArgs.contains("even") && strArgs.contains("odd")
-                || strArgs.contains("sunny") && strArgs.contains("square"))
-                || (strArgs.contains("spy") && strArgs.contains("duck"))) {
-            System.out.println("The request contains mutually exclusive properties: ");
-            System.out.printf("[%s", propertiesToSearch.get(0));
-            for (int i = 1; i < propertiesToSearch.size(); i++) {
+        List<String> wrongPropertiesToSearch = new ArrayList<>();
+        for (String currProperty : propertiesToSearch
+        ) {
+            if (propertiesToSearch.contains("-" + currProperty)) {
+                wrongPropertiesToSearch.add(currProperty);
+                wrongPropertiesToSearch.add("-" + currProperty);
+            }
 
-                System.out.printf(", %s", propertiesToSearch.get(i));
+
+        }
+
+        if (propertiesToSearch.contains("sunny") && propertiesToSearch.contains("square")) {
+            wrongPropertiesToSearch.add("sunny");
+            wrongPropertiesToSearch.add("square");
+        }
+        if (propertiesToSearch.contains("even") && propertiesToSearch.contains("odd")) {
+            wrongPropertiesToSearch.add("even");
+            wrongPropertiesToSearch.add("odd");
+        }
+        if (propertiesToSearch.contains("-even") && propertiesToSearch.contains("-odd")) {
+            wrongPropertiesToSearch.add("-even");
+            wrongPropertiesToSearch.add("-odd");
+        }
+        if (propertiesToSearch.contains("happy") && propertiesToSearch.contains("sad")) {
+            wrongPropertiesToSearch.add("happy");
+            wrongPropertiesToSearch.add("sad");
+        }
+        if (propertiesToSearch.contains("-happy") && propertiesToSearch.contains("-sad")) {
+            wrongPropertiesToSearch.add("-happy");
+            wrongPropertiesToSearch.add("-sad");
+        }
+        if (propertiesToSearch.contains("spy") && propertiesToSearch.contains("duck")) {
+            wrongPropertiesToSearch.add("spy");
+            wrongPropertiesToSearch.add("duck");
+        }
+        if (wrongPropertiesToSearch.size() > 0) {
+            System.out.println("The request contains mutually exclusive properties: ");
+            System.out.printf("[%s", wrongPropertiesToSearch.get(0).toUpperCase());
+            for (int i = 1; i < wrongPropertiesToSearch.size(); i++) {
+
+                System.out.printf(", %s", wrongPropertiesToSearch.get(i).toUpperCase());
             }
             System.out.printf("]%n");
             System.out.println("There are no numbers with these properties.");
             return true;
         }
+
         return false;
     }
 
@@ -167,9 +232,16 @@ public class Main {
         int currentAmount = 0;
         while (counter > currentAmount) {
             NumberWithProperties currentNumberWithProperties = new NumberWithProperties(number);
-            if (currentNumberWithProperties.properties.contains(property.toLowerCase())) {
-                printPropertiesForOneShort(currentNumberWithProperties);
-                currentAmount++;
+            if (property.contains("-")) {
+                if (!currentNumberWithProperties.properties.contains(property.toLowerCase().substring(1))) {
+                    printPropertiesForOneShort(currentNumberWithProperties);
+                    currentAmount++;
+                }
+            } else {
+                if (currentNumberWithProperties.properties.contains(property.toLowerCase())) {
+                    printPropertiesForOneShort(currentNumberWithProperties);
+                    currentAmount++;
+                }
             }
             number++;
         }
@@ -200,6 +272,8 @@ public class Main {
         System.out.println("       sunny: " + currentNumber.properties.contains("sunny"));
         System.out.println("      square: " + currentNumber.properties.contains("square"));
         System.out.println("     jumping: " + currentNumber.properties.contains("jumping"));
+        System.out.println("       happy: " + currentNumber.properties.contains("happy"));
+        System.out.println("         sad: " + currentNumber.properties.contains("sad"));
     }
 
     private static boolean isNotNaturalNumber(long number) {
