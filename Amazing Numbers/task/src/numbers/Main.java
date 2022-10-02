@@ -39,8 +39,7 @@ public class Main {
                 case 1 -> printPropertiesForOneLarge(strArrWithNumbers);
                 case 2 -> printPropertiesOfRangeNumbers(strArrWithNumbers);
                 case 3 -> printSearchPropertiesOfRange(strArrWithNumbers);
-                case 4 -> printSearchWithTwoPropertiesOfRange(strArrWithNumbers);
-                default -> System.out.println("Wrong Amount of arguments");
+                default -> printSearchWithTwoPropertiesOfRange(strArrWithNumbers);
             }
         }
 
@@ -50,30 +49,32 @@ public class Main {
     private static void printSearchWithTwoPropertiesOfRange(String[] strArrWithNumbers) {
         long number = Long.parseLong(strArrWithNumbers[0]);
         long countNumbers = Long.parseLong(strArrWithNumbers[1]);
-        String property1 = strArrWithNumbers[2].toLowerCase();
-        String property2 = strArrWithNumbers[3].toLowerCase();
-        String strArgs = String.join(" ", strArrWithNumbers).toLowerCase();
-        if ((strArgs.contains("even") && strArgs.contains("odd")
-                || strArgs.contains("sunny") && strArgs.contains("square"))
-                || (strArgs.contains("spy") && strArgs.contains("duck"))) {
-            System.out.println("The request contains mutually exclusive properties: ");
-            System.out.printf("[%s, %s]%n", property1.toUpperCase(), property2.toUpperCase());
-            System.out.println("There are no numbers with these properties.");
-            return;
+        List<String> propertiesToSearch = new ArrayList<>();
+        for (int i = 2; i < strArrWithNumbers.length; i++) {
+            propertiesToSearch.add(strArrWithNumbers[i].toLowerCase());
         }
         int currentAmount = 0;
         while (countNumbers > currentAmount) {
+            boolean isNotFinded = false;
             NumberWithProperties currentNumberWithProperties = new NumberWithProperties(number);
-            if (currentNumberWithProperties.properties.contains(property1) && currentNumberWithProperties.properties.contains(property2)) {
+            for (String currentProperty : propertiesToSearch
+            ) {
+                if (!currentNumberWithProperties.properties.contains(currentProperty)) {
+                    isNotFinded = true;
+                    break;
+                }
+            }
+            if (!isNotFinded) {
                 printPropertiesForOneShort(currentNumberWithProperties);
                 currentAmount++;
             }
+
             number++;
         }
     }
 
     private static boolean isCorrectArguments(String[] strArrWithNumbers) {
-        List<String> propertiesNames = Arrays.asList("BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE", "SUNNY", "EVEN", "ODD");
+        List<String> propertiesNames = Arrays.asList("BUZZ", "DUCK", "PALINDROMIC", "GAPFUL", "SPY", "SQUARE", "SUNNY", "EVEN", "ODD", "JUMPING");
         long firstNumber;
         long secondNumber;
         try {
@@ -100,25 +101,63 @@ public class Main {
                 return false;
             }
             if (strArrWithNumbers.length > 2) {
-                int indexOfWrongArgument = -1;
+                List<String> wrongArguments = new ArrayList<>();
                 for (int i = 2; i < strArrWithNumbers.length; i++) {
                     if (!propertiesNames.contains(strArrWithNumbers[i].toUpperCase())) {
-                        indexOfWrongArgument = indexOfWrongArgument == -1 ? i : -2;
+                        wrongArguments.add(strArrWithNumbers[i].toUpperCase());
                     }
                 }
+                switch (wrongArguments.size()) {
+                    case 0 -> {
+                        return !isMutuallyExclusiveNumbers(strArrWithNumbers);
+                    }
+                    case 1 -> {
+                        System.out.printf("The property [%s] is wrong.%n", wrongArguments.get(0));
+                        printAvaliableProperties(propertiesNames);
+                        return false;
+                    }
+                    default -> {
+                        System.out.printf("The properties [%s", wrongArguments.get(0));
 
-                if (indexOfWrongArgument == -2) {
-                    System.out.printf("The properties [%s, %s] are wrong.%n", strArrWithNumbers[2].toUpperCase(), strArrWithNumbers[3].toUpperCase());
-                } else if (indexOfWrongArgument == -1) {
-                    return true;
-                } else {
-                    System.out.printf("The property [%s] is wrong.%n", strArrWithNumbers[indexOfWrongArgument].toUpperCase());
+                        for (int i = 1; i < wrongArguments.size(); i++) {
+                            System.out.printf(", %s", wrongArguments.get(i));
+                        }
+                        System.out.printf("] are wrong.%n");
+                        printAvaliableProperties(propertiesNames);
+                        return false;
+                    }
                 }
-                System.out.printf("Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY]%n");
-                return false;
             }
         }
         return true;
+    }
+
+    private static void printAvaliableProperties(List<String> avaliableProperties) {
+        String strAvaliableProperties = String.join(", ", avaliableProperties);
+        System.out.printf("Available properties: [%s]%n", strAvaliableProperties);
+
+    }
+
+    private static boolean isMutuallyExclusiveNumbers(String[] strArrWithNumbers) {
+        List<String> propertiesToSearch = new ArrayList<>();
+        for (int i = 2; i < strArrWithNumbers.length; i++) {
+            propertiesToSearch.add(strArrWithNumbers[i].toLowerCase());
+        }
+        String strArgs = String.join(" ", strArrWithNumbers).toLowerCase();
+        if ((strArgs.contains("even") && strArgs.contains("odd")
+                || strArgs.contains("sunny") && strArgs.contains("square"))
+                || (strArgs.contains("spy") && strArgs.contains("duck"))) {
+            System.out.println("The request contains mutually exclusive properties: ");
+            System.out.printf("[%s", propertiesToSearch.get(0));
+            for (int i = 1; i < propertiesToSearch.size(); i++) {
+
+                System.out.printf(", %s", propertiesToSearch.get(i));
+            }
+            System.out.printf("]%n");
+            System.out.println("There are no numbers with these properties.");
+            return true;
+        }
+        return false;
     }
 
     private static void printSearchPropertiesOfRange(String[] strArrWithNumbers) {
@@ -160,6 +199,7 @@ public class Main {
         System.out.println("         spy: " + currentNumber.properties.contains("spy"));
         System.out.println("       sunny: " + currentNumber.properties.contains("sunny"));
         System.out.println("      square: " + currentNumber.properties.contains("square"));
+        System.out.println("     jumping: " + currentNumber.properties.contains("jumping"));
     }
 
     private static boolean isNotNaturalNumber(long number) {

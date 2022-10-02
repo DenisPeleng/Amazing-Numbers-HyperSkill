@@ -30,6 +30,9 @@ public class NumberWithProperties {
         if (isSquareNumber(number)) {
             properties.add("square");
         }
+        if (isJumpingNumber(number)) {
+            properties.add("jumping");
+        }
         properties.add(isOddNumber(number) ? "odd" : "even");
     }
 
@@ -47,7 +50,7 @@ public class NumberWithProperties {
             if (number % 10 == 0) {
                 return true;
             }
-            number = number / 10;
+            number /= 10;
         }
         return false;
     }
@@ -57,7 +60,7 @@ public class NumberWithProperties {
             long firstDigit = number;
             long lastDigit = number % 10;
             while (firstDigit >= 10) {
-                firstDigit = firstDigit / 10;
+                firstDigit /= 10;
             }
             String remainderForGapful = firstDigit + String.valueOf(lastDigit);
             return number % (Long.parseLong(remainderForGapful)) == 0;
@@ -111,6 +114,28 @@ public class NumberWithProperties {
 
     private static boolean isBuzzNumber(long number) {
         return isDivisableBySeven(number) || isEndedBySeven(number);
+    }
+
+    private static boolean isJumpingNumber(long number) {
+        char[] numberCharArr = String.valueOf(number).toCharArray();
+        if (numberCharArr.length < 2) {
+            return true;
+        } else if (numberCharArr.length < 3) {
+            int sequence1 = Math.abs((int) numberCharArr[0] - (int) numberCharArr[1]);
+            return sequence1 == 1;
+
+        } else {
+            for (int i = 1; i < numberCharArr.length - 1; i++) {
+                int sequence1 = Math.abs((int) numberCharArr[i] - (int) numberCharArr[i - 1]);
+                int sequence2 = Math.abs((int) numberCharArr[i] - (int) numberCharArr[i + 1]);
+
+                if (sequence1 != 1 || sequence2 != 1) {
+                    return false;
+                }
+
+            }
+        }
+        return true;
     }
 
 
